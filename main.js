@@ -1,10 +1,10 @@
 // Classes
 class Entity {
   constructor(x,y) {
-    console.log('new entity made');
+    // console.log('new entity made');
     this.x = x;
     this.y = y;
-    this.width = 50;
+    this.width = this.height = 50;
     this.color = "black";
   }
 
@@ -18,6 +18,7 @@ class Entity {
   update() {
     console.log('override me');
   }
+
 }
 class Player extends Entity {
   constructor(x,y) {
@@ -30,6 +31,11 @@ class Player extends Entity {
   }
   shoot() {
     console.log('shot');
+    var b = new Bullet(this.x, this.y - this.height);
+    b.y -= b.height;
+    console.log(this);
+    console.log(b);
+    game.entities.push(b);
   }
 }
 class Enemy extends Entity {
@@ -37,11 +43,29 @@ class Enemy extends Entity {
     super(x,y);
     this.color = "red";
   }
+  update() {
+
+  }
+}
+class Bullet extends Entity {
+  constructor(x,y) {
+    super(x,y);
+    this.color = "black";
+    this.width = this.height = 10;
+  }
+  draw(ctx) {
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+  }
+  update() {
+    this.y -= BULLET_SPEED;
+  }
 }
 // Globals & Constants
 const FPS = 30;
 const FRAME_LENGTH = 1000 / 30; // in milliseconds
 const SHOTS_PER_SECOND = 0.5;
+const BULLET_SPEED = 30;
 
 var game = {};
 
@@ -55,10 +79,11 @@ function init() {
   // Set up entities
   game.player = new Player(game.width / 2.0, game.height - 100)
   game.entities.push(game.player);
+  game.entities.push(new Enemy(game.width / 2.0, 100));
   // Start game gameLoop
   setInterval(gameLoop, FRAME_LENGTH);
   // Hack player to shoot every second
-  setInterval(game.player.shoot, SHOTS_PER_SECOND * 1000);
+  setInterval(function() {game.player.shoot()}, SHOTS_PER_SECOND * 1000);
 }
 function gameLoop() {
   draw();
