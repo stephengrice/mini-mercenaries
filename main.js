@@ -37,6 +37,10 @@ class Alien extends Entity {
   constructor(x,y) {
     super(x,y);
     this.health = 100;
+    var that = this;
+    setInterval(function() {
+      that.shoot();
+    }, SHOTS_PER_SECOND * 1000);
   }
   draw(ctx) {
     super.draw(ctx);
@@ -71,6 +75,7 @@ class Player extends Alien {
     //
   }
   shoot() {
+    if (this.dead) return;
     var b = new Bullet(this.x, this.y - this.height);
     b.direction = 90;
     b.y -= b.height;
@@ -83,6 +88,7 @@ class Enemy extends Alien {
     this.color = "red";
   }
   shoot() {
+    if (this.dead) return;
     var b = new Bullet(this.x, this.y + this.height);
     b.direction = 270;
     b.y += b.height;
@@ -127,13 +133,6 @@ function init() {
   game.entities.push(new Enemy(game.width / 2.0, 100));
   // Start game gameLoop
   setInterval(gameLoop, FRAME_LENGTH);
-  // Hack player to shoot every second
-  setInterval(function() {
-    if (!game.player.dead)
-      game.player.shoot();
-    if (!game.entities[1].dead)
-      game.entities[1].shoot();
-  }, SHOTS_PER_SECOND * 1000);
 }
 function gameLoop() {
   draw();
