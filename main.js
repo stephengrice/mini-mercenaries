@@ -73,6 +73,13 @@ class Player extends Alien {
     super(x,y);
     this.color = "blue";
     this.counter = 0;
+    this.sprite = document.getElementById('alien');
+    this.width = 121 * 0.8;
+    this.height = 152 * 0.8;
+  }
+  draw(ctx) {
+    var rect = this.getRect();
+    ctx.drawImage(this.sprite, rect.left, rect.top, this.width, this.height);
   }
   update() {
     //
