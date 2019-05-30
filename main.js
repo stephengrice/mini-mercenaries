@@ -30,11 +30,9 @@ class Player extends Entity {
     //
   }
   shoot() {
-    console.log('shot');
     var b = new Bullet(this.x, this.y - this.height);
+    b.direction = 90;
     b.y -= b.height;
-    console.log(this);
-    console.log(b);
     game.entities.push(b);
   }
 }
@@ -46,19 +44,27 @@ class Enemy extends Entity {
   update() {
 
   }
+  shoot() {
+    var b = new Bullet(this.x, this.y + this.height);
+    b.direction = 270;
+    b.y += b.height;
+    game.entities.push(b);
+  }
 }
 class Bullet extends Entity {
   constructor(x,y) {
     super(x,y);
     this.color = "black";
     this.width = this.height = 10;
+    this.direction = 90;
   }
   draw(ctx) {
     ctx.fillStyle = this.color;
     ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
   }
   update() {
-    this.y -= BULLET_SPEED;
+    this.x += BULLET_SPEED * Math.cos(degrees_to_radians(this.direction));
+    this.y -= BULLET_SPEED * Math.sin(degrees_to_radians(this.direction));
   }
 }
 // Globals & Constants
@@ -83,7 +89,7 @@ function init() {
   // Start game gameLoop
   setInterval(gameLoop, FRAME_LENGTH);
   // Hack player to shoot every second
-  setInterval(function() {game.player.shoot()}, SHOTS_PER_SECOND * 1000);
+  setInterval(function() {game.player.shoot(); game.entities[1].shoot()}, SHOTS_PER_SECOND * 1000);
 }
 function gameLoop() {
   draw();
@@ -99,5 +105,8 @@ function update() {
   for (var i = 0; i < game.entities.length; i++) {
     game.entities[i].update();
   }
+}
+function degrees_to_radians(degrees) {
+  return degrees * (Math.PI/180);
 }
 window.onload = init;
