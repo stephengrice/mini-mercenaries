@@ -155,13 +155,14 @@ class UI {
   }
 }
 // Globals & Constants
-const FPS = 30;
-const FRAME_LENGTH = 1000 / 30; // in milliseconds
-const SHOTS_PER_SECOND = 1;
-const BULLET_SPEED = 30;
-const HEALTHBAR_HEIGHT = 10;
-const BULLET_DAMAGE = 5;
-const SHOTS_TO_CHARGE_SPECIAL = 3;
+// TODO Change all of these to const for any final version
+var FPS = 30;
+var FRAME_LENGTH = 1000 / 30; // in milliseconds
+var SHOTS_PER_SECOND = 1;
+var BULLET_SPEED = 30;
+var HEALTHBAR_HEIGHT = 10;
+var BULLET_DAMAGE = 5;
+var SHOTS_TO_CHARGE_SPECIAL = 3;
 
 var game = {
   ui: {}
