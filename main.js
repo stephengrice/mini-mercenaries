@@ -39,7 +39,7 @@ class Entity {
 class Alien extends Entity {
   constructor(x,y) {
     super(x,y);
-    this.health = 100;
+    this.health = ALIEN_BASE_HEALTH;
     var that = this;
     setInterval(function() {
       that.shoot();
@@ -142,7 +142,7 @@ class MegaBullet extends Bullet {
   constructor(x,y) {
     super(x,y);
     this.width = this.height = 25;
-    this.damage *= 10;
+    this.damage = MEGABULLET_DAMAGE;
   }
 }
 class UI {
@@ -162,7 +162,9 @@ var SHOTS_PER_SECOND = 1;
 var BULLET_SPEED = 30;
 var HEALTHBAR_HEIGHT = 10;
 var BULLET_DAMAGE = 5;
+var MEGABULLET_DAMAGE = BULLET_DAMAGE * 10;
 var SHOTS_TO_CHARGE_SPECIAL = 3;
+var ALIEN_BASE_HEALTH = 100;
 
 var game = {
   ui: {}
