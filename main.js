@@ -32,6 +32,10 @@ class Entity {
       bottom: this.y + this.height / 2
     };
   }
+
+  die() {
+    this.dead = true;
+  }
 }
 class Alien extends Entity {
   constructor(x,y) {
@@ -54,14 +58,14 @@ class Alien extends Entity {
       var entity = game.entities[i];
       if (entity.dead) continue;
       if (this.collidesWith(entity) && entity instanceof Bullet) {
-        this.health -= 10;
+        this.health -= BULLET_DAMAGE;
         console.log("Ouch!");
-        entity.dead = true;
+        entity.die();
       }
     }
     // Remove me if my health is gone
     if (this.health <= 0) {
-      this.dead = true;
+      this.die();
     }
   }
 }
@@ -87,12 +91,22 @@ class Enemy extends Alien {
     super(x,y);
     this.color = "red";
   }
+  update() {
+    super.update();
+    if (this.y < 100) {
+      this.y += 5;
+    }
+  }
   shoot() {
     if (this.dead) return;
     var b = new Bullet(this.x, this.y + this.height);
     b.direction = 270;
     b.y += b.height;
     game.entities.push(b);
+  }
+  die() {
+    super.die()
+    game.entities.push(new Enemy(this.x, -50));
   }
 }
 class Bullet extends Entity {
@@ -117,6 +131,7 @@ const FRAME_LENGTH = 1000 / 30; // in milliseconds
 const SHOTS_PER_SECOND = 0.5;
 const BULLET_SPEED = 30;
 const HEALTHBAR_HEIGHT = 10;
+const BULLET_DAMAGE = 5;
 
 var game = {};
 
@@ -130,7 +145,7 @@ function init() {
   // Set up entities
   game.player = new Player(game.width / 2.0, game.height - 100)
   game.entities.push(game.player);
-  game.entities.push(new Enemy(game.width / 2.0, 100));
+  game.entities.push(new Enemy(game.width / 2.0, -50));
   // Start game gameLoop
   setInterval(gameLoop, FRAME_LENGTH);
 }
