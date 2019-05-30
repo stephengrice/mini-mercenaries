@@ -1,7 +1,6 @@
 // Classes
 class Entity {
   constructor(x,y) {
-    // console.log('new entity made');
     this.x = x;
     this.y = y;
     this.width = this.height = 50;
@@ -58,7 +57,7 @@ class Alien extends Entity {
       var entity = game.entities[i];
       if (entity.dead) continue;
       if (this.collidesWith(entity) && entity instanceof Bullet) {
-        this.health -= BULLET_DAMAGE;
+        this.health -= entity.damage;
         console.log("Ouch!");
         entity.die();
       }
@@ -84,6 +83,19 @@ class Player extends Alien {
     b.direction = 90;
     b.y -= b.height;
     game.entities.push(b);
+    this.counter++;
+    if (this.counter >= SHOTS_TO_CHARGE_SPECIAL) {
+      game.ui.btnSpecial.disabled = false;
+    }
+  }
+  specialAttack() {
+    if (this.dead) return;
+    var b = new MegaBullet(this.x, this.y - this.height);
+    b.direction = 90;
+    b.y -= b.height;
+    game.entities.push(b);
+    this.counter = 0;
+    game.ui.btnSpecial.disabled = true;
   }
 }
 class Enemy extends Alien {
@@ -115,6 +127,7 @@ class Bullet extends Entity {
     this.color = "black";
     this.width = this.height = 10;
     this.direction = 90;
+    this.damage = BULLET_DAMAGE;
   }
   draw(ctx) {
     ctx.fillStyle = this.color;
@@ -125,18 +138,38 @@ class Bullet extends Entity {
     this.y -= BULLET_SPEED * Math.sin(degrees_to_radians(this.direction));
   }
 }
+class MegaBullet extends Bullet {
+  constructor(x,y) {
+    super(x,y);
+    this.width = this.height = 25;
+    this.damage *= 10;
+  }
+}
+class UI {
+  static setup() {
+    game.ui.btnSpecial = document.getElementById('btnSpecial');
+    game.ui.btnSpecial.onclick = UI.btnSpecial;
+  }
+  static btnSpecial() {
+    game.player.specialAttack();
+  }
+}
 // Globals & Constants
 const FPS = 30;
 const FRAME_LENGTH = 1000 / 30; // in milliseconds
-const SHOTS_PER_SECOND = 0.5;
+const SHOTS_PER_SECOND = 1;
 const BULLET_SPEED = 30;
 const HEALTHBAR_HEIGHT = 10;
 const BULLET_DAMAGE = 5;
+const SHOTS_TO_CHARGE_SPECIAL = 3;
 
-var game = {};
+var game = {
+  ui: {}
+};
 
 // Functions
 function init() {
+  UI.setup();
   var canvas = document.getElementById('canvas');
   canvas.width = game.width = window.innerWidth;
   canvas.height = game.height = window.innerHeight;
