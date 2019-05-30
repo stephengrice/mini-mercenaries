@@ -6,6 +6,7 @@ class Entity {
     this.y = y;
     this.width = this.height = 50;
     this.color = "black";
+    this.dead = false;
   }
 
   draw(ctx) {
@@ -19,8 +20,48 @@ class Entity {
     console.log('override me');
   }
 
+  collidesWith(entity) {
+    return intersectRect(this.getRect(), entity.getRect());
+  }
+
+  getRect() {
+    return {
+      left: this.x - this.width / 2,
+      right: this.x + this.width / 2,
+      top: this.y - this.height / 2,
+      bottom: this.y + this.height / 2
+    };
+  }
 }
-class Player extends Entity {
+class Alien extends Entity {
+  constructor(x,y) {
+    super(x,y);
+    this.health = 100;
+  }
+  draw(ctx) {
+    super.draw(ctx);
+    // Draw health bar
+    ctx.fillStyle = "green";
+    ctx.fillRect(this.x - this.width / 2, this.y - this.height - HEALTHBAR_HEIGHT * 2, this.width * (this.health / 100), HEALTHBAR_HEIGHT);
+  }
+  update() {
+    // Check for collisions
+    for (var i = 0; i < game.entities.length; i++) {
+      var entity = game.entities[i];
+      if (entity.dead) continue;
+      if (this.collidesWith(entity) && entity instanceof Bullet) {
+        this.health -= 10;
+        console.log("Ouch!");
+        entity.dead = true;
+      }
+    }
+    // Remove me if my health is gone
+    if (this.health <= 0) {
+      this.dead = true;
+    }
+  }
+}
+class Player extends Alien {
   constructor(x,y) {
     super(x,y);
     this.color = "blue";
@@ -36,13 +77,10 @@ class Player extends Entity {
     game.entities.push(b);
   }
 }
-class Enemy extends Entity {
+class Enemy extends Alien {
   constructor(x,y) {
     super(x,y);
     this.color = "red";
-  }
-  update() {
-
   }
   shoot() {
     var b = new Bullet(this.x, this.y + this.height);
@@ -72,6 +110,7 @@ const FPS = 30;
 const FRAME_LENGTH = 1000 / 30; // in milliseconds
 const SHOTS_PER_SECOND = 0.5;
 const BULLET_SPEED = 30;
+const HEALTHBAR_HEIGHT = 10;
 
 var game = {};
 
@@ -89,7 +128,12 @@ function init() {
   // Start game gameLoop
   setInterval(gameLoop, FRAME_LENGTH);
   // Hack player to shoot every second
-  setInterval(function() {game.player.shoot(); game.entities[1].shoot()}, SHOTS_PER_SECOND * 1000);
+  setInterval(function() {
+    if (!game.player.dead)
+      game.player.shoot();
+    if (!game.entities[1].dead)
+      game.entities[1].shoot();
+  }, SHOTS_PER_SECOND * 1000);
 }
 function gameLoop() {
   draw();
@@ -98,15 +142,23 @@ function gameLoop() {
 function draw() {
   game.ctx.clearRect(0, 0, game.width, game.height);
   for (var i = 0; i < game.entities.length; i++) {
-    game.entities[i].draw(game.ctx);
+    if (!game.entities[i].dead)
+      game.entities[i].draw(game.ctx);
   }
 }
 function update() {
   for (var i = 0; i < game.entities.length; i++) {
-    game.entities[i].update();
+    if (!game.entities[i].dead)
+      game.entities[i].update();
   }
 }
 function degrees_to_radians(degrees) {
   return degrees * (Math.PI/180);
+}
+function intersectRect(r1, r2) {
+  return !(r2.left > r1.right ||
+           r2.right < r1.left ||
+           r2.top > r1.bottom ||
+           r2.bottom < r1.top);
 }
 window.onload = init;
